@@ -21,13 +21,24 @@ Skip the session if any fire: scheduled macro (FOMC/CPI/NFP), overnight gap ≤ 
 
 ## Install
 
+Needs Python 3.10+. No extra packages.
+
 ```bash
 git clone https://github.com/YOUR_USER/odte-put-scanner.git
 cd odte-put-scanner
-python3 scanner.py --chain chain.example.json
+chmod +x odte-scan odte-scan.pyz scanner.py odte-scan.command
 ```
 
-Stdlib + optional Yahoo overlay. `pandas` is not required. `requirements.txt` is only if you want `yfinance` later.
+Run as a program:
+
+```bash
+./odte-scan
+./odte-scan.pyz --chain chain.json
+python3 odte-scan.pyz
+```
+
+macOS double-click `odte-scan.command`. Windows double-click `odte-scan.bat`.
+No args uses `chain.json` if present, else the bundled example.
 
 ## Run
 
