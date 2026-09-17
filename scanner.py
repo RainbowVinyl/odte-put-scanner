@@ -429,11 +429,38 @@ def write_json_out(path: Path, mkt: Market, t: Ticket) -> None:
 # cli
 # ---------------------------------------------------------------------------
 
+def app_dir() -> Path:
+    """Directory of the running program (source, zipapp, or frozen binary)."""
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    argv0 = Path(sys.argv[0]).resolve()
+    if argv0.exists():
+        return argv0.parent if argv0.is_file() else argv0
+    return Path(__file__).resolve().parent
+
+
+def resolve_chain(explicit: str | None) -> Path | None:
+    if explicit:
+        return Path(explicit)
+    here = app_dir()
+    cwd = Path.cwd()
+    for cand in (
+        cwd / "chain.json",
+        here / "chain.json",
+        here / "chain.example.json",
+        cwd / "chain.example.json",
+    ):
+        if cand.exists():
+            return cand
+    return None
+
+
 def parse_args() -> argparse.Namespace:
+    here = app_dir()
     p = argparse.ArgumentParser(description="0DTE improved put-spread scanner")
-    p.add_argument("--chain", required=True, help="JSON put chain + spot/vix fields")
-    p.add_argument("--config", default=str(Path(__file__).with_name("config.json")))
-    p.add_argument("--events", default=str(Path(__file__).with_name("events.json")))
+    p.add_argument("--chain", help="JSON put chain. Default: ./chain.json or bundled example")
+    p.add_argument("--config", default=str(here / "config.json"))
+    p.add_argument("--events", default=str(here / "events.json"))
     p.add_argument("--width", type=int)
     p.add_argument("--contracts", type=int)
     p.add_argument("--event", default="", help="override event name, e.g. FOMC")
@@ -445,10 +472,15 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    chain_path = Path(args.chain)
-    if not chain_path.exists():
-        print(f"chain file not found: {chain_path}", file=sys.stderr)
+    chain_path = resolve_chain(args.chain)
+    if chain_path is None or not chain_path.exists():
+        print(
+            "chain file not found. Put quotes in chain.json next to the program\n"
+            "or pass --chain /path/to/chain.json",
+            file=sys.stderr,
+        )
         return 2
+    print(f"[scanner] chain: {chain_path}", file=sys.stderr)
 
     cfg = load_cfg(Path(args.config) if args.config else None, args)
     mkt = load_market(chain_path)

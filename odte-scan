@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Executable launcher for the 0DTE put-spread scanner.
+set -euo pipefail
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PYTHON="${PYTHON:-python3}"
+if [[ $# -eq 0 ]]; then
+  exec "$PYTHON" "$DIR/scanner.py" --live
+fi
+exec "$PYTHON" "$DIR/scanner.py" "$@"
