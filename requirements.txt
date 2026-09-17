@@ -1,0 +1,5 @@
+# Optional. Scanner runs on Python 3.10+ stdlib + pandas if present.
+# pandas is used only if available; JSON/CSV chain files work without it.
+requests>=2.31.0
+yfinance>=0.2.40
+pandas>=2.0.0

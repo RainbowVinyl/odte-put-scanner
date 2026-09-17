@@ -1,0 +1,17 @@
+# runtime
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.DS_Store
+
+# user dumps
+chain.json
+ticket.json
+*.out
+
+# editors
+.idea/
+.vscode/

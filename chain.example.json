@@ -1,0 +1,17 @@
+{
+  "asof": "2026-09-17T09:00:00-05:00",
+  "spot": 6688.57,
+  "prior_close": 6716.09,
+  "vix": 16.4,
+  "vix1d": 15.1,
+  "event": "",
+  "expiration": "2026-09-17",
+  "puts": [
+    {"strike": 6685, "bid": 8.10, "ask": 8.40, "delta": -0.48},
+    {"strike": 6680, "bid": 6.40, "ask": 6.70, "delta": -0.41},
+    {"strike": 6670, "bid": 4.20, "ask": 4.50, "delta": -0.29},
+    {"strike": 6660, "bid": 2.80, "ask": 3.10, "delta": -0.21},
+    {"strike": 6650, "bid": 1.85, "ask": 2.10, "delta": -0.15},
+    {"strike": 6640, "bid": 1.20, "ask": 1.40, "delta": -0.11}
+  ]
+}

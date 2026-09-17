@@ -1,0 +1,4 @@
+{
+  "comment": "Add YYYY-MM-DD dates to skip. Scanner also flags common macro names if you pass --event.",
+  "skip_dates": []
+}
