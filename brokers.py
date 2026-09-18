@@ -99,7 +99,11 @@ def fetch_yahoo_options(symbol: str, expiration: str | None = None) -> dict[str,
 
 
 def fetch_polygon_options(symbol: str, expiration: str | None = None, api_key: str | None = None) -> dict[str, Any]:
-    key = api_key or os.environ.get("POLYGON_API_KEY") or os.environ.get("POLYGON_KEY")
+    key = (
+        api_key
+        or os.environ.get("POLYGON_API_KEY")
+        or os.environ.get("POLYGON_KEY")
+    )
     if not key:
         raise RuntimeError("Set POLYGON_API_KEY")
     exp = expiration or today_iso()
@@ -177,8 +181,20 @@ BROKERS = {
 }
 
 
-def fetch_chain(broker: str, symbol: str, expiration: str | None = None) -> dict[str, Any]:
+def fetch_chain(
+    broker: str,
+    symbol: str,
+    expiration: str | None = None,
+    creds: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     name = broker.lower().strip()
     if name not in BROKERS:
         raise RuntimeError(f"unknown broker {broker!r}. choose: {', '.join(BROKERS)}")
+    creds = creds or {}
+    if name == "polygon":
+        return fetch_polygon_options(symbol, expiration, creds.get("polygon_api_key") or None)
+    if name == "tradier":
+        if creds.get("tradier_endpoint"):
+            os.environ.setdefault("TRADIER_ENDPOINT", str(creds["tradier_endpoint"]))
+        return fetch_tradier_options(symbol, expiration, creds.get("tradier_token") or None)
     return BROKERS[name](symbol, expiration)

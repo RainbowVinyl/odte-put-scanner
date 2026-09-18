@@ -1,0 +1,9 @@
+{
+  "broker": "yahoo",
+  "symbol": "SPY",
+  "expiration": "",
+  "auto_fetch": true,
+  "polygon_api_key": "",
+  "tradier_token": "",
+  "tradier_endpoint": "https://api.tradier.com/v1"
+}

@@ -454,7 +454,7 @@ def ensure_sidecar_files() -> None:
     """Copy bundled defaults next to the exe so a zip drop-in works."""
     dest = app_dir()
     src = bundled_dir()
-    for name in ("config.json", "events.json", "chain.example.json"):
+    for name in ("config.json", "events.json", "chain.example.json", "integrations.example.json"):
         target = dest / name
         source = src / name
         if not target.exists() and source.exists() and source.resolve() != target.resolve():
@@ -492,12 +492,13 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--broker",
         choices=["file", "yahoo", "polygon", "tradier"],
-        default="file",
-        help="optional live option tape. file = chain.json only",
+        default=None,
+        help="live option tape. default from integrations.json",
     )
-    p.add_argument("--symbol", default="SPY", help="underlying for --broker (SPY is most reliable on Yahoo)")
+    p.add_argument("--symbol", default=None, help="underlying for --broker")
     p.add_argument("--expiration", help="YYYY-MM-DD. Default: nearest expiry the broker returns")
     p.add_argument("--save-chain", help="write fetched tape to this JSON path")
+    p.add_argument("--setup", action="store_true", help="write integrations.json in this folder, then exit")
     return p.parse_args()
 
 
@@ -514,8 +515,25 @@ def _pause_if_needed() -> None:
 def main() -> int:
     ensure_sidecar_files()
     args = parse_args()
+    here = app_dir()
+    from integrations import load_integrations, setup_wizard
+
+    if args.setup:
+        setup_wizard(here)
+        return 0
+
+    integ = load_integrations(here)
     if getattr(sys, "frozen", False) and "--live" not in sys.argv:
         args.live = True
+    if not args.broker:
+        if integ.get("auto_fetch") and integ.get("broker") and integ["broker"] != "file":
+            args.broker = integ["broker"]
+        else:
+            args.broker = "file"
+    if not args.symbol:
+        args.symbol = integ.get("symbol") or "SPY"
+    if not args.expiration:
+        args.expiration = integ.get("expiration") or None
     cfg = load_cfg(Path(args.config) if args.config else None, args)
 
     mkt: Market | None = None
@@ -525,7 +543,7 @@ def main() -> int:
         except ImportError:
             from odte_put_scanner.brokers import fetch_chain  # type: ignore
         try:
-            raw = fetch_chain(args.broker, args.symbol, args.expiration)
+            raw = fetch_chain(args.broker, args.symbol, args.expiration, creds=integ)
         except Exception as exc:
             print(f"[scanner] broker {args.broker} failed: {exc}", file=sys.stderr)
             return 2

@@ -7,9 +7,11 @@ venv/
 .env
 .DS_Store
 
-# user dumps
+# user dumps + local secrets (never commit)
 chain.json
 ticket.json
+integrations.json
+secrets.json
 *.out
 
 # editors
