@@ -10,5 +10,7 @@
   "delta_band": 0.08,
   "timezone": "America/Chicago",
   "entry_window": "09:00-09:05 CT",
-  "width_max_allowed": 20
+  "width_max_allowed": 20,
+  "broker": "file",
+  "symbol": "SPY"
 }

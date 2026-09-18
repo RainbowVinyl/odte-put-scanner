@@ -31,6 +31,20 @@ See [BUILD.md](BUILD.md).
 
 Until a workflow has run, this repo is source only — there is no checked-in `.exe`.
 
+## Live option tape (optional broker)
+
+Default is still a local `chain.json`. After launch you can pull a chain:
+
+```bash
+python3 scanner.py --broker yahoo --symbol SPY --live
+python3 scanner.py --broker polygon --symbol SPY          # POLYGON_API_KEY
+python3 scanner.py --broker tradier --symbol SPY          # TRADIER_TOKEN
+```
+
+Yahoo is delayed and reliable on **SPY/QQQ**, not SPX. Fetched quotes overwrite `chain.json` (or `--save-chain`).
+
+Robinhood quotes work in this Grok chat. A downloaded exe cannot log into Robinhood.
+
 ## Run from source
 
 Needs Python 3.10+. No extra packages.

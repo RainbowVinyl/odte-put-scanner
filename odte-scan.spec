@@ -10,7 +10,7 @@ a = Analysis(
         ("events.json", "."),
         ("chain.example.json", "."),
     ],
-    hiddenimports=[],
+    hiddenimports=["brokers"],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

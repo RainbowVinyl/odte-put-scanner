@@ -133,8 +133,7 @@ def load_cfg(path: Path | None, args: argparse.Namespace) -> Cfg:
     return cfg
 
 
-def load_market(chain_path: Path) -> Market:
-    raw = load_json(chain_path)
+def market_from_raw(raw: dict[str, Any]) -> Market:
     puts = [
         Put(
             strike=float(p["strike"]),
@@ -155,6 +154,10 @@ def load_market(chain_path: Path) -> Market:
         asof=str(raw.get("asof") or ""),
         puts=puts,
     )
+
+
+def load_market(chain_path: Path) -> Market:
+    return market_from_raw(load_json(chain_path))
 
 
 def _f(v: Any) -> float | None:
@@ -486,6 +489,15 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--live", action="store_true", help="overlay Yahoo ^GSPC/^VIX/^VIX1D")
     p.add_argument("--atm", action="store_true", help="scan BASELINE ATM instead of 20d/EM")
     p.add_argument("--out", help="write JSON ticket to this path")
+    p.add_argument(
+        "--broker",
+        choices=["file", "yahoo", "polygon", "tradier"],
+        default="file",
+        help="optional live option tape. file = chain.json only",
+    )
+    p.add_argument("--symbol", default="SPY", help="underlying for --broker (SPY is most reliable on Yahoo)")
+    p.add_argument("--expiration", help="YYYY-MM-DD. Default: nearest expiry the broker returns")
+    p.add_argument("--save-chain", help="write fetched tape to this JSON path")
     return p.parse_args()
 
 
@@ -504,18 +516,36 @@ def main() -> int:
     args = parse_args()
     if getattr(sys, "frozen", False) and "--live" not in sys.argv:
         args.live = True
-    chain_path = resolve_chain(args.chain)
-    if chain_path is None or not chain_path.exists():
-        print(
-            "chain file not found. Put quotes in chain.json next to the program\n"
-            "or pass --chain /path/to/chain.json",
-            file=sys.stderr,
-        )
-        return 2
-    print(f"[scanner] chain: {chain_path}", file=sys.stderr)
-
     cfg = load_cfg(Path(args.config) if args.config else None, args)
-    mkt = load_market(chain_path)
+
+    mkt: Market | None = None
+    if args.broker and args.broker != "file":
+        try:
+            from brokers import fetch_chain
+        except ImportError:
+            from odte_put_scanner.brokers import fetch_chain  # type: ignore
+        try:
+            raw = fetch_chain(args.broker, args.symbol, args.expiration)
+        except Exception as exc:
+            print(f"[scanner] broker {args.broker} failed: {exc}", file=sys.stderr)
+            return 2
+        mkt = market_from_raw(raw)
+        save_to = Path(args.save_chain) if args.save_chain else (app_dir() / "chain.json")
+        save_to.write_text(json.dumps(raw, indent=2))
+        print(f"[scanner] tape {args.broker} {args.symbol} → {save_to}  puts={len(mkt.puts)}", file=sys.stderr)
+    else:
+        chain_path = resolve_chain(args.chain)
+        if chain_path is None or not chain_path.exists():
+            print(
+                "chain file not found. Put quotes in chain.json, or run with\n"
+                "  --broker yahoo --symbol SPY\n"
+                "  --broker polygon   (POLYGON_API_KEY)\n"
+                "  --broker tradier   (TRADIER_TOKEN)",
+                file=sys.stderr,
+            )
+            return 2
+        print(f"[scanner] chain: {chain_path}", file=sys.stderr)
+        mkt = load_market(chain_path)
 
     event_dates: set[str] = set()
     ev_path = Path(args.events)
