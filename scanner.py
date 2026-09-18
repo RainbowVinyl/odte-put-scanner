@@ -499,6 +499,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--expiration", help="YYYY-MM-DD. Default: nearest expiry the broker returns")
     p.add_argument("--save-chain", help="write fetched tape to this JSON path")
     p.add_argument("--setup", action="store_true", help="write integrations.json in this folder, then exit")
+    p.add_argument("--links", action="store_true", help="print broker signup / API links and exit")
     return p.parse_args()
 
 
@@ -516,8 +517,11 @@ def main() -> int:
     ensure_sidecar_files()
     args = parse_args()
     here = app_dir()
-    from integrations import load_integrations, setup_wizard
+    from integrations import load_integrations, print_links, setup_wizard
 
+    if args.links:
+        print_links()
+        return 0
     if args.setup:
         setup_wizard(here)
         return 0

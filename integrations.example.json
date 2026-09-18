@@ -5,5 +5,13 @@
   "auto_fetch": true,
   "polygon_api_key": "",
   "tradier_token": "",
-  "tradier_endpoint": "https://api.tradier.com/v1"
+  "tradier_endpoint": "https://api.tradier.com/v1",
+  "links": {
+    "yahoo_options": "https://finance.yahoo.com/quote/SPY/options/",
+    "polygon_signup": "https://polygon.io/dashboard/signup",
+    "polygon_api_keys": "https://polygon.io/dashboard/api-keys",
+    "tradier_signup": "https://www.tradier.com/",
+    "tradier_api_token": "https://dash.tradier.com/settings/api",
+    "cboe_spx": "https://www.cboe.com/delayed_quotes/spx/quote_table"
+  }
 }
