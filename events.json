@@ -1,4 +1,15 @@
 {
-  "comment": "Add YYYY-MM-DD dates to skip. Scanner also flags common macro names if you pass --event.",
-  "skip_dates": []
+  "comment": "Hard-skip dates for the improved book. Add local holidays if your desk is closed.",
+  "skip_dates": [
+    "2026-10-28",
+    "2026-11-06",
+    "2026-12-11",
+    "2026-12-16"
+  ],
+  "notes": {
+    "2026-10-28": "FOMC",
+    "2026-11-06": "NFP (first Friday estimate — confirm BLS calendar)",
+    "2026-12-11": "CPI (confirm BLS calendar)",
+    "2026-12-16": "FOMC"
+  }
 }

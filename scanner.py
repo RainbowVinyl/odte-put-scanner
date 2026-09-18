@@ -459,6 +459,10 @@ def ensure_sidecar_files() -> None:
         source = src / name
         if not target.exists() and source.exists() and source.resolve() != target.resolve():
             target.write_bytes(source.read_bytes())
+    integ = dest / "integrations.json"
+    example = dest / "integrations.example.json"
+    if not integ.exists() and example.exists():
+        integ.write_bytes(example.read_bytes())
 
 
 def resolve_chain(explicit: str | None) -> Path | None:
@@ -550,11 +554,16 @@ def main() -> int:
             raw = fetch_chain(args.broker, args.symbol, args.expiration, creds=integ)
         except Exception as exc:
             print(f"[scanner] broker {args.broker} failed: {exc}", file=sys.stderr)
-            return 2
-        mkt = market_from_raw(raw)
-        save_to = Path(args.save_chain) if args.save_chain else (app_dir() / "chain.json")
-        save_to.write_text(json.dumps(raw, indent=2))
-        print(f"[scanner] tape {args.broker} {args.symbol} → {save_to}  puts={len(mkt.puts)}", file=sys.stderr)
+            print("[scanner] falling back to local chain.json if present", file=sys.stderr)
+            chain_path = resolve_chain(args.chain)
+            if chain_path is None or not chain_path.exists():
+                return 2
+            mkt = load_market(chain_path)
+        else:
+            mkt = market_from_raw(raw)
+            save_to = Path(args.save_chain) if args.save_chain else (app_dir() / "chain.json")
+            save_to.write_text(json.dumps(raw, indent=2))
+            print(f"[scanner] tape {args.broker} {args.symbol} → {save_to}  puts={len(mkt.puts)}", file=sys.stderr)
     else:
         chain_path = resolve_chain(args.chain)
         if chain_path is None or not chain_path.exists():

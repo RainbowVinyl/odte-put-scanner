@@ -52,10 +52,17 @@ def _put_rows(puts: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
+def _yahoo_symbol(symbol: str) -> str:
+    s = symbol.upper().strip()
+    aliases = {"SPX": "SPY", "SPXW": "SPY", "^SPX": "SPY", "^GSPC": "SPY", "NDX": "QQQ"}
+    return aliases.get(s, s)
+
+
 def fetch_yahoo_options(symbol: str, expiration: str | None = None) -> dict[str, Any]:
     """
-    Public delayed chain. Works well for SPY/QQQ. SPX/SPXW is hit-or-miss on Yahoo.
+    Public delayed chain. Works well for SPY/QQQ. SPX/SPXW is mapped to SPY.
     """
+    symbol = _yahoo_symbol(symbol)
     url = f"https://query2.finance.yahoo.com/v7/finance/options/{urllib.parse.quote(symbol)}"
     data = http_json(url)
     result = (data.get("optionChain") or {}).get("result") or []

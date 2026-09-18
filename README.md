@@ -45,6 +45,15 @@ Yahoo is delayed and reliable on **SPY/QQQ**, not SPX. Fetched quotes overwrite 
 
 Robinhood quotes work in this Grok chat. A downloaded exe cannot log into Robinhood.
 
+```bash
+python3 scanner.py --links
+python3 scanner.py --setup
+```
+
+`--setup` writes `integrations.json` in this folder only and can open Polygon/Tradier signup pages. See [INTEGRATIONS.md](INTEGRATIONS.md).
+
+If a live broker call fails, the scanner falls back to local `chain.json`. Yahoo `SPX`/`SPXW` is mapped to **SPY** (Yahoo does not serve a reliable index chain).
+
 ## Run from source
 
 Needs Python 3.10+. No extra packages.
