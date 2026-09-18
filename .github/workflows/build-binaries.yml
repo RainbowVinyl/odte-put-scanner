@@ -1,0 +1,80 @@
+name: Build no-install binaries
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install PyInstaller
+        run: python -m pip install --upgrade pip pyinstaller
+      - name: Build exe
+        run: pyinstaller --noconfirm odte-scan.spec
+      - name: Stage portable folder
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/portable | Out-Null
+          Copy-Item dist/odte-scan.exe dist/portable/
+          Copy-Item config.json,events.json,chain.example.json,README.md dist/portable/
+          Copy-Item chain.example.json dist/portable/chain.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: odte-scan-windows
+          path: dist/portable/*
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install PyInstaller
+        run: python -m pip install --upgrade pip pyinstaller
+      - name: Build binary
+        run: pyinstaller --noconfirm odte-scan.spec
+      - name: Stage portable folder
+        run: |
+          mkdir -p dist/portable
+          cp dist/odte-scan dist/portable/odte-scan
+          chmod +x dist/portable/odte-scan
+          cp config.json events.json chain.example.json README.md dist/portable/
+          cp chain.example.json dist/portable/chain.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: odte-scan-linux
+          path: dist/portable/*
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install PyInstaller
+        run: python -m pip install --upgrade pip pyinstaller
+      - name: Build binary
+        run: pyinstaller --noconfirm odte-scan.spec
+      - name: Stage portable folder
+        run: |
+          mkdir -p dist/portable
+          cp dist/odte-scan dist/portable/odte-scan
+          chmod +x dist/portable/odte-scan
+          cp config.json events.json chain.example.json README.md dist/portable/
+          cp chain.example.json dist/portable/chain.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: odte-scan-macos
+          path: dist/portable/*

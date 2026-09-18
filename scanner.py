@@ -439,6 +439,25 @@ def app_dir() -> Path:
     return Path(__file__).resolve().parent
 
 
+def bundled_dir() -> Path:
+    """PyInstaller extract dir, else app dir."""
+    meipass = getattr(sys, "_MEIPASS", None)
+    if meipass:
+        return Path(meipass)
+    return app_dir()
+
+
+def ensure_sidecar_files() -> None:
+    """Copy bundled defaults next to the exe so a zip drop-in works."""
+    dest = app_dir()
+    src = bundled_dir()
+    for name in ("config.json", "events.json", "chain.example.json"):
+        target = dest / name
+        source = src / name
+        if not target.exists() and source.exists() and source.resolve() != target.resolve():
+            target.write_bytes(source.read_bytes())
+
+
 def resolve_chain(explicit: str | None) -> Path | None:
     if explicit:
         return Path(explicit)
@@ -470,8 +489,21 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
+def _pause_if_needed() -> None:
+    if sys.stdout.isatty() and not getattr(sys, "frozen", False):
+        return
+    if getattr(sys, "frozen", False) or sys.platform.startswith("win"):
+        try:
+            input("\nPress Enter to close...")
+        except EOFError:
+            pass
+
+
 def main() -> int:
+    ensure_sidecar_files()
     args = parse_args()
+    if getattr(sys, "frozen", False) and "--live" not in sys.argv:
+        args.live = True
     chain_path = resolve_chain(args.chain)
     if chain_path is None or not chain_path.exists():
         print(
@@ -503,4 +535,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    code = main()
+    _pause_if_needed()
+    raise SystemExit(code)

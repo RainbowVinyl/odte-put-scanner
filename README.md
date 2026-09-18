@@ -19,26 +19,27 @@ Skip the session if any fire: scheduled macro (FOMC/CPI/NFP), overnight gap ≤ 
 
 **Not financial advice.** Historical mid-price studies overstate live fills. A 0DTE put spread can lose nearly the full width.
 
-## Install
+## No-install (what to send other people)
+
+Python is **not** required for recipients after you build once.
+
+1. On GitHub: **Actions → Build no-install binaries → Run workflow**
+2. Download `odte-scan-windows` (or macOS / Linux)
+3. Send that folder. They double-click `odte-scan.exe`
+
+See [BUILD.md](BUILD.md).
+
+Until a workflow has run, this repo is source only — there is no checked-in `.exe`.
+
+## Run from source
 
 Needs Python 3.10+. No extra packages.
 
 ```bash
-git clone https://github.com/YOUR_USER/odte-put-scanner.git
+git clone https://github.com/RainbowVinyl/odte-put-scanner.git
 cd odte-put-scanner
-chmod +x odte-scan odte-scan.pyz scanner.py odte-scan.command
+python3 scanner.py --chain chain.example.json
 ```
-
-Run as a program:
-
-```bash
-./odte-scan
-./odte-scan.pyz --chain chain.json
-python3 odte-scan.pyz
-```
-
-macOS double-click `odte-scan.command`. Windows double-click `odte-scan.bat`.
-No args uses `chain.json` if present, else the bundled example.
 
 ## Run
 
