@@ -32,4 +32,26 @@ Copy `dist\odte-scan.exe` into a folder with `config.json`, `events.json`, `chai
 
 No Python. No pip. SmartScreen may warn because the exe is unsigned.
 
-It still does not place broker orders and cannot invent a live SPX options chain.
+It still does not place broker orders.
+
+## Integrations file (this computer only)
+
+```bash
+python3 scanner.py --setup
+```
+
+or copy `integrations.example.json` to `integrations.json` in the same folder as the exe.
+
+That file is gitignored. Keys stay on that machine.
+
+```json
+{
+  "broker": "yahoo",
+  "symbol": "SPY",
+  "auto_fetch": true,
+  "polygon_api_key": "",
+  "tradier_token": ""
+}
+```
+
+`auto_fetch: true` pulls tape on double-click. `broker: file` uses only `chain.json`.
